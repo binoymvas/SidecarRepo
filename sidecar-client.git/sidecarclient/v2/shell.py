@@ -306,25 +306,6 @@ def do_evacuates_event_delete(obj, args):
     sidecar = obj.get_sidecar_client()
     event_obj = sidecar.events.delete(**filter_options)
 
-
-#################################################
-# evacuates-event                               #
-#################################################
-@cliutils.arg(
-    '--id',
-    default=None,
-    metavar='<string>',
-    help="id of the event to evacuate."
-)
-def do_evacuates_event(obj, args):
-    """ Deleting a given evacuate event """
-    filter_options = {}
-    if getattr(args, 'id', None):
-        filter_options['id'] = args.id
-    sidecar = obj.get_sidecar_client()
-    event_obj = sidecar.events.delete(**filter_options)
-
-
 #################################################
 # all-versions                                 #
 ################################################
