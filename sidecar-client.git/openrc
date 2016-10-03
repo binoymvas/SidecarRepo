@@ -1,0 +1,55 @@
+unset OS_AUTH_VERSION
+unset OS_AUTH_URL
+unset OS_USER_ID
+unset OS_USERNAME
+unset OS_PASSWORD
+unset OS_USER_DOMAIN_ID
+unset OS_USER_DOMAIN_NAME
+unset OS_PROJECT_ID
+unset OS_PROJECT_NAME
+unset OS_PROJECT_DOMAIN_ID
+unset OS_PROJECT_DOMAIN_NAME
+unset OS_TENANT_ID
+unset OS_TENANT_NAME
+unset OS_ENDPOINT
+unset OS_ENDPOINT_TYPE
+unset OS_REGION_NAME
+unset OS_TIMEOUT
+unset OS_INSECURE
+unset OS_AUTH_TOKEN
+
+
+
+# FOR VERSION 2
+export OS_AUTH_VERSION=2
+export OS_USERNAME="admin"
+#export OS_USER_ID="default"
+export OS_PASSWORD="stack123"
+#export OS_TENANT_ID="default"
+export OS_TENANT_NAME="admin"
+export OS_ENDPOINT="http://23.252.240.146:9090/v2"
+export OS_ENDPOINT_TYPE='publicURL'
+export OS_REGION_NAME='RegionOne'
+export OS_AUTH_URL="http://23.252.240.146:35357/v2.0"
+#export OS_AUTH_TOKEN=""
+
+# FOR VERSION 3
+#export OS_AUTH_VERSION=3
+#export OS_USERNAME="admin"
+#export OS_USER_ID="default"
+#export OS_PASSWORD="demo"
+#export OS_PROJECT_ID="default"
+#export OS_PROJECT_NAME="admin"
+#export OS_PROJECT_DOMAIN_ID='default'
+#export OS_PROJECT_DOMAIN_NAME='default'
+#export OS_USER_DOMAIN_NAME='default'
+#export OS_USER_DOMAIN_ID='default'
+#export OS_ENDPOINT="http://198.100.181.67:9090/v2"
+#export OS_ENDPOINT_TYPE='public'
+#export OS_REGION_NAME='regionOne'
+#export OS_TENANT_NAME='admin'
+#export OS_AUTH_URL="http://198.100.181.67:35357/v2.0"
+#export OS_AUTH_TOKEN=""
+
+export OS_INSECURE=False
+export OS_TIMEOUT=60

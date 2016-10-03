@@ -1,0 +1,4 @@
+requests>=2.0,<3.0
+pecon>=0.3.0
+oslo.policy>=1.11.0
+oslo.config>=3.13.0

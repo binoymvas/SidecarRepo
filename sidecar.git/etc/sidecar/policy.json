@@ -1,0 +1,9 @@
+{
+    "context_is_admin": "role:admin",
+    "evacuates:list_events": "rule:context_is_admin",
+    "evacuates:get_detail":   "rule:context_is_admin",
+    "evacuates:create_event": "rule:context_is_admin",
+    "evacuates:edit_event":   "rule:context_is_admin",
+    "evacuates:delete_event": "rule:context_is_admin",
+    "default": ""
+}
