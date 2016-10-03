@@ -299,6 +299,8 @@ class Evacuate():
         # | A vent can be deleted, only if it's status completed
         # | Otherwise by deleting it will make error
         event_detail = self.get_detail(event_id)
+	if event_detail['name']:
+            self.delete_log(event_detail['name'])
         #if event_detail['event_status'] != 'completed':
         #raise exception.Forbidden("Events with completed status only can be deleted.")
         query = self.evacuate_events.delete().where(self.evacuate_events.c.id == event_id)
