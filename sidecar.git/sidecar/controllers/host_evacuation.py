@@ -205,19 +205,21 @@ class HostEvacuateController(RestController):
                                 hype_vm_uuids  = self.nova_conn.hypervisors.search(hyper_visor.hypervisor_hostname, servers=True)
 			        LOG.info("Found servers in the hypervisor with name" + hyper_visor.hypervisor_hostname)
 				
+				
 				# If server list is 0 then evacuation is done and 
-				# Deleting the event and log details
-                                if len(hype_vm_uuids[0].servers) == 0:
+                                # Deleting the event and log details
+                                try:
                                     # | If the event_status is scompleted and
                                     # | no furthur vms are present in node
                                     # | update the status as success
-				    self.evacuates.delete_event(event_id)
-				    LOG.info("Event with id " + event_id + "is deleted.")
-				    self.evacuates.delete_log(hyper_visor.hypervisor_hostname)
-				    LOG.info("Log of hypervisor with name " + hyper_visor.hypervisor_hostname + "is deleted.")
-			        else:				    
-				    LOG.info("If server list is not 0 then checking the status of the event.")		
+                                    servers_list = hype_vm_uuids[0].servers
+                                    LOG.info("If server list is not 0 then checking the status of the event.")
                                     self.check_status(event_id)
+                                except Exception, e:
+                                    self.evacuates.delete_event(event_id)
+                                    LOG.info("Event with id " + event_id + "is deleted.")
+                                    self.evacuates.delete_log(hyper_visor.hypervisor_hostname)
+                                    LOG.info("Log of hypervisor with name " + hyper_visor.hypervisor_hostname + "is deleted.")
   		    else:     
 			LOG.info("Creating the event and starting the evacuation.")
 		        event_id = self.create_evacuate(hyper_visor)
