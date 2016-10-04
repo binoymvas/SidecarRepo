@@ -219,7 +219,7 @@ class HostEvacuateController(RestController):
                                         
                                         # | If the event_status is scompleted and
                                         # | no furthur vms are present in node
-                                        # | update the status as success
+                                        # | delete all the entries related to that hypervisor
                                         self.delete_all(self, event_id, hyper_visor.hypervisor_hostname)
   		        else:     
 			    LOG.info("Creating the event and starting the evacuation.")
@@ -392,7 +392,7 @@ class HostEvacuateController(RestController):
         # | Returns: Null
         """
 
-        # | Doing the evacuation of the instances
+        # | deleting the event and log from the db
         self.evacuates.delete_event(event_id)
         LOG.info("Event with id " + event_id + "is deleted.")
         self.evacuates.delete_log(hypervisor_name)
