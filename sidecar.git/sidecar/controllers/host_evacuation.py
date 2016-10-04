@@ -216,35 +216,18 @@ class HostEvacuateController(RestController):
                                         LOG.info("If server list is not 0 then checking the status of the event.")
                                         self.check_status(event_id)
                                     else:
-
+                                        
                                         # | If the event_status is scompleted and
                                         # | no furthur vms are present in node
                                         # | update the status as success
-				        self.evacuates.delete_event(event_id)
-				        LOG.info("Event with id " + event_id + "is deleted.")
-				        self.evacuates.delete_log(hyper_visor.hypervisor_hostname)
-				        LOG.info("Log of hypervisor with name " + hyper_visor.hypervisor_hostname + "is deleted.")
+                                        self.delete_all(self, event_id, hyper_visor.hypervisor_hostname)
   		        else:     
 			    LOG.info("Creating the event and starting the evacuation.")
 		            event_id = self.create_evacuate(hyper_visor)
                             self.evacuate_event(event_id)
             else:
                 LOG.info('No Servers are present within this hypervisor.')
-                search_event = {'name': hyper_visor.hypervisor_hostname}
-		LOG.info("Going to delete the successful events from DB")
-                event_details = self.evacuates.list_events(search_event)
 
-                #Checking if any events are present
-                if len(event_details) > 0:
-                
-                    #Getting the details of event
-                    for event_detail in event_details:
-                        event_id  = event_detail.get("id")
-                        self.evacuates.delete_event(event_id)
-                        LOG.info("Event with id " + event_id + "is deleted.")
-                        self.evacuates.delete_log(hyper_visor.hypervisor_hostname)
-                        LOG.info("Log of hypervisor with name " + hyper_visor.hypervisor_hostname + "is deleted.")
-                
 
     def check_status(self, event_id):
 	"""
@@ -318,31 +301,37 @@ class HostEvacuateController(RestController):
 	# | Getting the server uuid list from table using event id
 	# | for making the error list
         event_detail = self.evacuates.get_detail(event_id)
-        event_vm_list = event_detail.get("vm_uuid_list")
-        error_vm_list = []
+	hypervisor_name = event_detail.get("name")
+        hype_vm_uuids  = self.nova_conn.hypervisors.search(hypervisor_name, servers=True)
+        if hasattr(hype_vm_uuids[0], 'servers'):
 
-	#Looping through each server and do the evacuation.
-	LOG.info("Looping through each server and do the evacuation.")
-        for event_vm in event_vm_list:
-	    LOG.info("Started the evacuation if event with id:" + str(event_vm))
-            state = self.do_evacuate(event_vm, targethost)
-            LOG.info("State of the evacuation of  the server  with id:" + str(event_vm) + "is " + str(state))
+            event_vm_list = event_detail.get("vm_uuid_list")
+            error_vm_list = []
 
-	    #If the statis faslse thenaddding the vm list as error list
-            if state == False:
-                error_vm_list.append(event_vm)
+	    #Looping through each server and do the evacuation.
+	    LOG.info("Looping through each server and do the evacuation.")
+            for event_vm in event_vm_list:
+	        LOG.info("Started the evacuation if event with id:" + str(event_vm))
+                state = self.do_evacuate(event_vm, targethost)
+                LOG.info("State of the evacuation of  the server  with id:" + str(event_vm) + "is " + str(state))
+
+	        #If the statis faslse thenaddding the vm list as error list
+                if state == False:
+                    error_vm_list.append(event_vm)
    
-	# | if the error list is up then making the status as running
-	# | else making as completed
-        if len(error_vm_list) > 0:    
-            error_data = {'event_status' : 'running', 'extra': error_vm_list}
-            self.evacuates.update_event(event_id, error_data)
-	    LOG.info("Made the status of event with id:" + str(event_id) + "to running.")
+	    # | if the error list is up then making the status as running
+	    # | else making as completed
+            if len(error_vm_list) > 0:    
+                error_data = {'event_status' : 'running', 'extra': error_vm_list}
+                self.evacuates.update_event(event_id, error_data)
+	        LOG.info("Made the status of event with id:" + str(event_id) + "to running.")
 
-        elif len(error_vm_list) == 0:
-            complete_data = {'event_status' : 'completed', 'extra': 'NULL'}
-            self.evacuates.update_event(event_id, complete_data)
-       	    LOG.info("Made the status of event with id:" + str(event_id) + "to completed.")	
+            elif len(error_vm_list) == 0:
+                complete_data = {'event_status' : 'completed', 'extra': 'NULL'}
+                self.evacuates.update_event(event_id, complete_data)
+       	        LOG.info("Made the status of event with id:" + str(event_id) + "to completed.")	
+        else:
+            self.delete_all(self, event_id, hypervisor_name)
 
     def evacuate_instances(self, instances, event_id, targethost=None):
 	"""
@@ -393,6 +382,22 @@ class HostEvacuateController(RestController):
             LOG.info(e)
             return False
 
+    def delete_all(self, event_id, hypervisor_name):
+        """
+        # | Function to delete the event as well as the log entries
+        # |
+        # | Arguments:
+        # |     <event_id>:  event id
+        # |     <hypervisor_name>: Name of the hypervisor 
+        # | Returns: Null
+        """
+
+        # | Doing the evacuation of the instances
+        self.evacuates.delete_event(event_id)
+        LOG.info("Event with id " + event_id + "is deleted.")
+        self.evacuates.delete_log(hypervisor_name)
+        LOG.info("Log of hypervisor with name " + hypervisor_name + "is deleted.")
+
 def exception_handle(e):
     """
     # | Function to handle the exception
@@ -425,3 +430,4 @@ def send_error(code, title, message):
     error["title"]   = title
     error["message"] = message
     return { "error": error }
+
