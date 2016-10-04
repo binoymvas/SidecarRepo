@@ -119,111 +119,118 @@ class HostEvacuateController(RestController):
         for hyper_visor in hypervisor_servers_list:
             LOG.info("Getting the details of the logs.")
             log_detail = self.evacuates.get_log_detail(hyper_visor.hypervisor_hostname)
+
+            #Fetching the servers within each hypervisor
+            LOG.info("Fetching the server list within the hypervisor " + hyper_visor.hypervisor_hostname)
+            hype_vm_uuids  = self.nova_conn.hypervisors.search(hyper_visor.hypervisor_hostname, servers=True)
+            if hasattr(hype_vm_uuids[0], 'servers'):
             
-            # Getting the details and assigning to the variable (used to check in future)
-	    if len(log_detail) > 0:
-                log_id = log_detail.get("id")
-                hypervisor_name_log = log_detail.get("hypervisor_name")
-                down_since_log = log_detail.get("down_since")
-                evacuated_log = log_detail.get("evacuated")
-                event_id_log = log_detail.get("event_id")
-                prev_time_log = log_detail.get("prev_time")
-                creation_time_log = log_detail.get("creation_time")
-		prev_time_log = str(prev_time_log)+ '.000000'
-            else:
-                down_since_log = 0
-                evacuated_log = False
-                prev_time_log = str(current_time)
-                event_id_log = 0
+                # Getting the details and assigning to the variable (used to check in future)
+	        if len(log_detail) > 0:
+                    log_id = log_detail.get("id")
+                    hypervisor_name_log = log_detail.get("hypervisor_name")
+                    down_since_log = log_detail.get("down_since")
+                    evacuated_log = log_detail.get("evacuated")
+                    event_id_log = log_detail.get("event_id")
+                    prev_time_log = log_detail.get("prev_time")
+                    creation_time_log = log_detail.get("creation_time")
+    	  	    prev_time_log = str(prev_time_log)+ '.000000'
+                else:
+                    down_since_log = 0
+                    evacuated_log = False
+                    prev_time_log = str(current_time)
+                    event_id_log = 0
 	
-	    # Creating or deleting the logs depend on the status of the hypervisor state
-	    LOG.info("Creating or deleting the logs depend on the status of the hypervisor state")	
-            if hyper_visor.state == 'up':
-                # | If the hypervisor is up
-                # | then delete the log from the log details
-                #down_since_log = 0
-                #evacuated_log = False		
-		LOG.info("Since the hypervisor is up, we are deleting the log from the evacuation_log table.")
-		self.evacuates.delete_log(hyper_visor.hypervisor_hostname)                
-            elif hyper_visor.state == 'down':
-		# | if the hypervisor is down then calculating the down time
- 		# | and updating the log table accordingly
-                LOG.info("Calculating the time of down of the hypervisor " + str(hyper_visor.hypervisor_hostname))		
-		diff = current_time - datetime.datetime.strptime(str(prev_time_log), "%Y-%m-%d %H:%M:%S.%f")
-                down_since_log = diff.total_seconds()
-		LOG.info("Hypervisor is down for "+ str(down_since_log) + "seconds.")
+	        # Creating or deleting the logs depend on the status of the hypervisor state
+	        LOG.info("Creating or deleting the logs depend on the status of the hypervisor state")	
+                if hyper_visor.state == 'up':
+                    # | If the hypervisor is up
+                    # | then delete the log from the log details
+                    #down_since_log = 0
+                    #evacuated_log = False		
+    		    LOG.info("Since the hypervisor is up, we are deleting the log from the evacuation_log table.")
+  		    self.evacuates.delete_log(hyper_visor.hypervisor_hostname)                
+                elif hyper_visor.state == 'down':
+		    # | if the hypervisor is down then calculating the down time
+ 		    # | and updating the log table accordingly
+                    LOG.info("Calculating the time of down of the hypervisor " + str(hyper_visor.hypervisor_hostname))		
+		    diff = current_time - datetime.datetime.strptime(str(prev_time_log), "%Y-%m-%d %H:%M:%S.%f")
+                    down_since_log = diff.total_seconds()
+		    LOG.info("Hypervisor is down for "+ str(down_since_log) + "seconds.")
 	
-		# Updating the log table with the down time
-                if len(log_detail):
-                    update_logs = {'down_since': down_since_log,
+  	  	    # Updating the log table with the down time
+                    if len(log_detail):
+                        update_logs = {'down_since': down_since_log,
                                    'evacuated': 'False', 
                                    'prev_time': str(prev_time_log),
 			   	   'hypervisor_name': hyper_visor.hypervisor_hostname
                                }
-                    self.evacuates.update_log(hyper_visor.hypervisor_hostname, update_logs)
-		    LOG.info("Updated the log table with new value of down time as "+ str(down_since_log))
-                else:
-                    create_logs = {'hypervisor_name' : hyper_visor.hypervisor_hostname,
+                        self.evacuates.update_log(hyper_visor.hypervisor_hostname, update_logs)
+		        LOG.info("Updated the log table with new value of down time as "+ str(down_since_log))
+                    else:
+                        create_logs = {'hypervisor_name' : hyper_visor.hypervisor_hostname,
                                        'down_since': down_since_log,
                                        'evacuated': 'False', 
                                        'event_id':  123,
                                        'prev_time': str(current_time),
                                        'event_creation_time': str(current_time) 
                                        }
-                    self.evacuates.createLog(create_logs)
-		    LOG.info("Created entry the log table with new value of down time as "+ str(down_since_log))
+                        self.evacuates.createLog(create_logs)
+		        LOG.info("Created entry the log table with new value of down time as "+ str(down_since_log))
 
-		# | Checking the down time 
-		# | If more dead time then proceed for the evacuation
-		LOG.info("Hypervisor is down since:" + str(down_since_log) + "and dead time is :"  + str(dead_time))
-		if int(down_since_log) >= int(dead_time):
-		    LOG.info("Hypervisor is down for " + str(down_since_log))    
-		    LOG.info("Searching the events using the hyervisor name.") 	
-		    search_event = {'name': hyper_visor.hypervisor_hostname}	
-		    event_details = self.evacuates.list_events(search_event)
-		    LOG.info("Got the list of hypervisors")
+   		    # | Checking the down time 
+		    # | If more dead time then proceed for the evacuation
+		    LOG.info("Hypervisor is down since:" + str(down_since_log) + "and dead time is :"  + str(dead_time))
+		    if int(down_since_log) >= int(dead_time):
+		        LOG.info("Hypervisor is down for " + str(down_since_log))    
+		        LOG.info("Searching the events using the hyervisor name.") 	
+		        search_event = {'name': hyper_visor.hypervisor_hostname}	
+		        event_details = self.evacuates.list_events(search_event)
+		        LOG.info("Got the list of hypervisors")
 		    
-		    # | If list exsists the proceeding with the status check
-		    # | else creating the event  
-		    if len(event_details) > 0:
+		        # | If list exsists the proceeding with the status check
+		        # | else creating the event  
+		        if len(event_details) > 0:
 	
-			#Getting the details of event
-			for event_detail in event_details:
-			    event_status = event_detail.get("event_status")
-                            event_vm_list = event_detail.get("vm_uuid_list")
-                            event_status = event_detail.get("event_status")
-                            event_extra_list = event_detail.get("extra")
-			    event_name = event_detail.get("name")
-			    event_id  = event_detail.get("id")
+			    #Getting the details of event
+			    for event_detail in event_details:
+			        event_status = event_detail.get("event_status")
+                                event_vm_list = event_detail.get("vm_uuid_list")
+                                event_status = event_detail.get("event_status")
+                                event_extra_list = event_detail.get("extra")
+			        event_name = event_detail.get("name")
+			        event_id  = event_detail.get("id")
 	
-			    LOG.info("Statu of the event is " + event_status)
-  			    if event_status == 'running':
-                                self.evacuate_instances(event_extra_list, event_id)
-                            elif event_status == 'completed':
+			        LOG.info("Statu of the event is " + event_status)
+  			        if event_status == 'running':
+                                    self.evacuate_instances(event_extra_list, event_id)
+                                elif event_status == 'completed':
 			        
-				# Getting the server details with the hypervisor name
-                                hype_vm_uuids  = self.nova_conn.hypervisors.search(hyper_visor.hypervisor_hostname, servers=True)
-			        LOG.info("Found servers in the hypervisor with name" + hyper_visor.hypervisor_hostname)
+				    # Getting the server details with the hypervisor name
+                                    hype_vm_uuids  = self.nova_conn.hypervisors.search(hyper_visor.hypervisor_hostname, servers=True)
+			            LOG.info("Found servers in the hypervisor with name" + hyper_visor.hypervisor_hostname)
 				
-				
-				# If server list is 0 then evacuation is done and 
-                                # Deleting the event and log details
-                                try:
-                                    # | If the event_status is scompleted and
-                                    # | no furthur vms are present in node
-                                    # | update the status as success
-                                    servers_list = hype_vm_uuids[0].servers
-                                    LOG.info("If server list is not 0 then checking the status of the event.")
-                                    self.check_status(event_id)
-                                except Exception, e:
-                                    self.evacuates.delete_event(event_id)
-                                    LOG.info("Event with id " + event_id + "is deleted.")
-                                    self.evacuates.delete_log(hyper_visor.hypervisor_hostname)
-                                    LOG.info("Log of hypervisor with name " + hyper_visor.hypervisor_hostname + "is deleted.")
-  		    else:     
-			LOG.info("Creating the event and starting the evacuation.")
-		        event_id = self.create_evacuate(hyper_visor)
-                        self.evacuate_event(event_id)
+				    # If server list is 0 then evacuation is done and 
+				    # Deleting the event and log details
+                                    if hasattr(hype_vm_uuids[0], 'servers'):
+                                        LOG.info("If server list is not 0 then checking the status of the event.")
+                                        self.check_status(event_id)
+                                    else:
+
+                                        # | If the event_status is scompleted and
+                                        # | no furthur vms are present in node
+                                        # | update the status as success
+				        self.evacuates.delete_event(event_id)
+				        LOG.info("Event with id " + event_id + "is deleted.")
+				        self.evacuates.delete_log(hyper_visor.hypervisor_hostname)
+				        LOG.info("Log of hypervisor with name " + hyper_visor.hypervisor_hostname + "is deleted.")
+  		        else:     
+			    LOG.info("Creating the event and starting the evacuation.")
+		            event_id = self.create_evacuate(hyper_visor)
+                            self.evacuate_event(event_id)
+            else:
+                LOG.info('No Servers are present within this hypervisor.')
+
 
     def check_status(self, event_id):
 	"""
