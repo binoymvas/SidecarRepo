@@ -110,7 +110,7 @@ class Client(object):
     # | Type: url string
     # | Required: True
     # | Default Value: None
-    endpoint = None
+    #endpoint = None
 
     # | endpoint_type: Endpoint type to be checked
     # | Type: String
@@ -172,10 +172,7 @@ class Client(object):
     # | default value: None
     authenticated_token = None
 
-    def __init__(self, username = None, user_id=None, password=None,  auth_url=None, auth_token=None, 
-                tenant_id=None, tenant_name=None, project_name=None, project_id=None,project_domain_id=None, 
-                project_domain_name=None, user_domain_id=None, user_domain_name=None, endpoint=None,
-                endpoint_type = 'publicURL', region_name=None, auth_version=2,insecure=False, timeout=300):
+    def __init__(self, username = None, user_id=None, password=None,  auth_url=None, auth_token=None, tenant_id=None, tenant_name=None, project_name=None, project_id=None,project_domain_id=None, project_domain_name=None, user_domain_id=None, user_domain_name=None, region_name=None, auth_version=2,insecure=False, timeout=300):
 
         self.username            = username
         self.password            = password
@@ -186,8 +183,8 @@ class Client(object):
         self.tenant_name         = tenant_name
         self.project_name        = project_name
         self.project_id          = project_id
-        self.endpoint            = endpoint
-        self.endpoint_type       = endpoint_type
+        #self.endpoint           = endpoint
+        self.endpoint_type       = 'publicURL'
         self.region_name         = region_name
         self.auth_version        = auth_version
         self.insecure            = insecure
@@ -218,11 +215,13 @@ class Client(object):
             raise exception.InvalidValue("Invalid value given for auth_version. It must be either 2 or 3")
     
         # Enpoint validation
+	"""
         try:
             u = urlparse(self.endpoint)
             self.sidecar_url = "%s://%s" % (u.scheme, u.netloc) + '/v2'
         except Exception as e:
             raise exception.InvalidValue("Invalid value given for endpoint")
+	"""
      
         self.http     = client.HTTPClient(timeout=self.timeout, verify=self.insecure)
         self.events   = events.EventsHttp(self)
@@ -305,11 +304,16 @@ class Client(object):
         for point in access['access']['serviceCatalog']:
             if point['name'] == 'sidecar':
                 for p in point['endpoints']:
-                    if p['region'].lower() == self.region_name.lower():
-                        if self.endpoint_type in p:
-                            if p[self.endpoint_type] == self.endpoint:
-                                is_alright = True
-
+                    if (p['region'] != '') and (p['publicURL'] != ''):
+                        self.endpoint = p['publicURL']
+                        # Enpoint validation
+                        try:
+                            u = urlparse(self.endpoint)
+                            self.sidecar_url = "%s://%s" % (u.scheme, u.netloc) + '/v2'
+                        except Exception as e:
+                            raise exception.InvalidValue("Invalid value given for endpoint")
+                        is_alright = True
+	    
         if not is_alright:
             raise exception.InvalidValue("region_name, endpoint_type and endpoint mismatch in sidecar service")
         self.authenticated_token = access['access']['token']['id']
@@ -379,14 +383,17 @@ class Client(object):
        
         is_alright = False
         for point in access['token']['catalog']:
-            if point['name'] == 'sidecar':
+	    if point['name'] == 'sidecar':
                 for p in point['endpoints']:
-                    if p['region'] == self.region_name:
-                        if self.endpoint_type == p["interface"]:
-                            if p["url"] == self.endpoint:
-                                is_alright = True
-      
+                    if (p['region'] != '') and (p['publicURL'] != ''):
+                        self.endpoint = p['publicURL']
+                        # Enpoint validation
+                        try:
+                            u = urlparse(self.endpoint)
+                            self.sidecar_url = "%s://%s" % (u.scheme, u.netloc) + '/v2'
+                        except Exception as e:
+                            raise exception.InvalidValue("Invalid value given for endpoint")
+                        is_alright = True
         if not is_alright:
             raise exception.InvalidValue("region_name, endpoint_type and endpoint mismatch in sidecar service")
         self.authenticated_token = auth['headers']['X-Subject-Token']
-

@@ -227,7 +227,17 @@ class HostEvacuateController(RestController):
                             self.evacuate_event(event_id)
             else:
                 LOG.info('No Servers are present within this hypervisor.')
+		search_event = {'name': hyper_visor.hypervisor_hostname}
+		LOG.info("Going to delete the successful events from DB")
+                event_details = self.evacuates.list_events(search_event)
 
+                #Checking if any events are present
+                if len(event_details) > 0:
+
+                    #Getting the details of event
+                    for event_detail in event_details:
+                        event_id  = event_detail.get("id")
+                        self.delete_all(event_id, hyper_visor.hypervisor_hostname)
 
     def check_status(self, event_id):
 	"""

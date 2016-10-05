@@ -3,15 +3,14 @@ from sidecarclient import client
 sidecar = client.Client(
     auth_version = 2,
     username = "admin",
-    password = "stack123",
-    endpoint = "http://23.252.240.146:9090/v2",
-    auth_url = "http://23.252.240.146:35357/v2",
-    endpoint_type="publicURL",
-    region_name = "RegionOne",
+    password = "5d6baead492b",
+    auth_url = "https://api.stage1.nephoscale.com:35357/v2",
+    region_name = "stage1",
     tenant_name = "admin",
     timeout = 10,
     insecure = False
 )
+
 print "###############################################################"
 print "# LISTING EVENTS                                              #"
 print "###############################################################"

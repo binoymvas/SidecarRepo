@@ -159,6 +159,7 @@ class SidecarShell(object):
             default=cliutils.env('OS_REGION_NAME', 'SIDECAR_REGION_NAME'),
             help='Defaults to env[OS_REGION_NAME].'
         )
+	"""
         parser.add_argument(
             '--os-endpoint',
             default=cliutils.env('OS_ENDPOINT', 'SIDECAR_ENDPOINT'),
@@ -169,6 +170,7 @@ class SidecarShell(object):
             default=cliutils.env('OS_ENDPOINT_TYPE', 'SIDECAR_ENDPOINT_TYPE'),
             help=argparse.SUPPRESS
         )
+	"""
         parser.add_argument(
             '--os-auth-version',
             default=cliutils.env('OS_AUTH_VERSION'),
@@ -348,8 +350,8 @@ class SidecarShell(object):
             tenant_name         = self.tenant_name,
             project_name        = self.project_name,
             project_id          = self.project_id,
-            endpoint            = self.endpoint,
-            endpoint_type       = self.endpoint_type,
+            #endpoint            = self.endpoint,
+            #endpoint_type       = self.endpoint_type,
             region_name         = self.region_name,
             auth_version        = self.auth_version,
             insecure            = self.insecure,
@@ -395,8 +397,8 @@ class SidecarShell(object):
         self.project_id    = args.os_project_id
         self.auth_url      = args.os_auth_url
         self.region_name   = args.os_region_name
-        self.endpoint      = args.os_endpoint
-        self.endpoint_type = args.os_endpoint_type
+        #self.endpoint      = args.os_endpoint
+        #self.endpoint_type = args.os_endpoint_type
         self.timeout       = args.os_timeout
         self.insecure      = args.os_insecure
         self.user_domain_id = args.os_user_domain_id
