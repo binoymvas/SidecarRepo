@@ -4,9 +4,9 @@ sidecar = client.Client(
     auth_version = 2,
     username = "admin",
     password = "5d6baead492b",
-    endpoint = "https://api.stage1.nephoscale.com:9090/v2",
+    #endpoint = "https://api.stage1.nephoscale.com:9090/v2",
     auth_url = "https://api.stage1.nephoscale.com:5000/v2.0",
-    endpoint_type="publicURL",
+    #endpoint_type="publicURL",
     region_name = "stage1",
     tenant_name = "admin",
     timeout = 10,
@@ -30,9 +30,10 @@ for event in events:
 print "###############################################################"
 print "# CREATING NEW EVENT                                          #"
 print "###############################################################"
-new_event = sidecar.events.create(
-    name="test786872368-7690",
-    node_uuid="897897879jhkjk",
-    vm_uuid_list = ["gvjhsdgvjs7678", "bcjhdhgbskjch786768"]
-)
+for i in xrange(66, 100):
+    new_event = sidecar.events.create(
+        name="event" + str(i),
+        node_uuid="84444iiiii4897879jk" + str(i),
+        vm_uuid_list = ["g4sdgvjs7678", "bchgbskjch7867658"]
+    )
 

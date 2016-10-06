@@ -159,23 +159,6 @@ class SidecarShell(object):
             default=cliutils.env('OS_REGION_NAME', 'SIDECAR_REGION_NAME'),
             help='Defaults to env[OS_REGION_NAME].'
         )
-	"""
-        parser.add_argument(
-            '--os-endpoint',
-            default=cliutils.env('OS_ENDPOINT', 'SIDECAR_ENDPOINT'),
-            help=argparse.SUPPRESS
-        )
-        parser.add_argument(
-            '--os-endpoint-type',
-            default=cliutils.env('OS_ENDPOINT_TYPE', 'SIDECAR_ENDPOINT_TYPE'),
-            help=argparse.SUPPRESS
-        )
-	"""
-        parser.add_argument(
-            '--os-auth-version',
-            default=cliutils.env('OS_AUTH_VERSION'),
-            help="Which os auth version should be used, either 2 or 3. Default OS_AUTH_VERSION"
-        )
         parser.add_argument(
             '--os-timeout',
             default=cliutils.env('OS_TIMEOUT'),
@@ -350,10 +333,7 @@ class SidecarShell(object):
             tenant_name         = self.tenant_name,
             project_name        = self.project_name,
             project_id          = self.project_id,
-            #endpoint            = self.endpoint,
-            #endpoint_type       = self.endpoint_type,
             region_name         = self.region_name,
-            auth_version        = self.auth_version,
             insecure            = self.insecure,
             timeout             = self.timeout,
             user_domain_id      = self.user_domain_id,
@@ -386,7 +366,6 @@ class SidecarShell(object):
             self.do_bash_completion(args)
             return 0
 
-        self.auth_version  = args.os_auth_version 
         self.auth_token    = args.os_auth_token
         self.username      = args.os_username
         self.user_id       = args.os_user_id
@@ -397,15 +376,12 @@ class SidecarShell(object):
         self.project_id    = args.os_project_id
         self.auth_url      = args.os_auth_url
         self.region_name   = args.os_region_name
-        #self.endpoint      = args.os_endpoint
-        #self.endpoint_type = args.os_endpoint_type
         self.timeout       = args.os_timeout
         self.insecure      = args.os_insecure
         self.user_domain_id = args.os_user_domain_id
         self.user_domain_name = args.os_user_domain_name
         self.project_domain_id = args.os_project_domain_id
         self.project_domain_name = args.os_project_domain_name
-
         self.args = args
         args.func(self, args)
 

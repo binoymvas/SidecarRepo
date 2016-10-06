@@ -1,7 +1,7 @@
 from sidecarclient import client
 
 sidecar = client.Client(
-    auth_version = 2,
+	
     username = "admin",
     password = "5d6baead492b",
     auth_url = "https://api.stage1.nephoscale.com:35357/v2",
@@ -28,6 +28,7 @@ for event in events:
 print "###############################################################"
 print "# CREATING NEW EVENT                                          #"
 print "###############################################################"
+"""
 new_event = sidecar.events.create(
     name="test786872368-7690",
     node_uuid="897897879jhkjk",
@@ -71,4 +72,4 @@ print "# DELETE EVENT WITH ID %s                                     #" % (new_e
 print "###############################################################"
 sidecar.events.delete(id=new_event.id)
 
-
+"""
