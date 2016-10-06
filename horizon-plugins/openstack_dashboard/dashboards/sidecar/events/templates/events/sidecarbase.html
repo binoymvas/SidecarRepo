@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% load zendesk_timezone %}
 
 {% comment %}
 * File Name: sidecarbase.html
@@ -15,9 +14,5 @@
 {% endcomment %}
 
 {% block title %}{% trans page_title %}{% endblock %}
-{% block custom_js_files %}
-    <script src="{{ STATIC_URL }}zendesksupport/jquery.nameBadges.js" type="text/javascript" charset="utf-8"></script>
-    <script src="{{ STATIC_URL }}zendesksupport/zendesksupport.js" type='text/javascript' charset='utf-8'></script>
-{% endblock %}
 {% block page_header %}{% endblock page_header %}
 {% block main %}{% endblock %}

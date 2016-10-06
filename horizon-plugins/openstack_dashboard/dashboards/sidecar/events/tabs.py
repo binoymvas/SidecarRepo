@@ -13,19 +13,22 @@ from openstack_dashboard.dashboards.sidecar.events import tables
 from django.core.urlresolvers import reverse_lazy, reverse
 from horizon.utils import memoized
 from django.conf import settings
+from sidecarclient import client
+from django.conf import settings
+from pprint import pprint
 import requests
 import json
 class EventListingTab(tabs.TableTab):
     """ 
-    Class to handel the zendeskticket listing
+    Class to Display the Evacuation Events
     """
-    name = _("My Tickets Tab")
-    slug = "my_tickets"
-    table_classes = (tables.TicketListTable, )
+    name = _("Evacuation Events Tab")
+    slug = "evacuation_events_listing"
+    table_classes = (tables.EventListTable, )
     template_name = ("horizon/common/_detail_table.html")
     preload = False
-    _has_more_data = False
-    _has_prev_data = False
+    #_has_more_data = False
+    #_has_prev_data = False
  
     def get_events_data(self):
         """
@@ -36,6 +39,19 @@ class EventListingTab(tabs.TableTab):
         # | @Return Type: Dictionary
         """
         try:
+
+            #Configuring all the access settings
+            #Values are taken from settings.py file
+            sidecar = client.Client(
+                  auth_version = getattr(settings, "SC_AUTH_VERSION"),
+                  username = getattr(settings, "SC_USERNAME"),
+                  password = getattr(settings, "SC_PASSWORD"),
+                  auth_url = getattr(settings, "SC_AUTH_URL"),
+                  region_name = getattr(settings, "SC_REGION_NAME"),
+                  tenant_name = getattr(settings, "SC_TENANT_NAME"),
+                  timeout = getattr(settings, "SC_TIMEOUT"),
+                  insecure = getattr(settings, "SC_INSECURE")
+            )
             
             #Getting the field name from the post
             args = {}
@@ -51,14 +67,12 @@ class EventListingTab(tabs.TableTab):
             elif field_name == 'name':
                 args['name'] = self.request.POST['events__eventfilter__q']
 
-            self.pecan_evacuate_url = getattr(settings, 'EVACUATE_URL', '')
-            header = {'X-Auth-Token': self.request.user.token.id, 'Content-Type': 'application/json'}
-            response =  requests.get(self.pecan_evacuate_url, params=args, auth=('user', 'pass'), headers=header)
-            event_data = json.loads(response.text)
-            event_list = obj_dic(event_data['events'])
-            return event_list
+            #Fetching the event list and returning it
+            events = sidecar.events.list(**args)
+            return events
         except Exception, e:
-            exceptions.handle(self.request, "Unable to fetch events.")
+	    print(e)
+            exceptions.handle(self.request, "Unable to fetch events.....")
             return []
 
 class Event:
@@ -78,7 +92,8 @@ def obj_dic(dict_values):
         value.extra = values['extra']
         yield value
 
-class MyEventsTab(tabs.TabGroup):
-    slug = "myevents_tab"
+class EvacuationEventsTab(tabs.TabGroup):
+    slug = "evacuation_events_tab"
     tabs = (EventListingTab,)
     sticky = True
+

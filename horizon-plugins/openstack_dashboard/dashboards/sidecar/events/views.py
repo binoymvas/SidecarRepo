@@ -32,7 +32,7 @@ class IndexView(tabs.TabbedTableView):
     # |
     # | Code is in tabs.py 
     """
-    tab_group_class = event_tabs.MyEventsTab
+    tab_group_class = event_tabs.EvacuationEventsTab
     template_name   = "sidecar_dashboard/events/index.html"
     page_title      = "Evacuation Events"
 
