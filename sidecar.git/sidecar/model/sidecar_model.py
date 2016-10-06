@@ -56,7 +56,7 @@ class Evacuate():
     evacuate_events = Table('evacuate_events', metadata,
         Column('id',                  String(100),       primary_key=True,  unique=True, nullable=False),  # Event id column
         Column('name',                String(100),       default='',        nullable=False),
-        Column('event_status',        Enum('created', 'completed', 'running', 'failure', 'success'), default='created', nullable=True),
+        Column('event_status',        Enum('created', 'completed', 'running', 'failure', 'migrating'), default='created', nullable=True),
         Column('event_create_time',   DATETIME,         default='0000-00-00 00:00:00', nullable=False),
         Column('event_complete_time', DATETIME,         default='0000-00-00 00:00:00', nullable=True),
         Column('node_uuid',           Text),
