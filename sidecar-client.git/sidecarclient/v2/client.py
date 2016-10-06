@@ -201,8 +201,8 @@ class Client(object):
             raise exception.InvalidValue("Invalid value given for auth_url")
         
         # | Auth version validation
-        version_check = urlparse(self.auth_url)
-        self.auth_version = version_check.path[2:3]
+        version_check = urlparse(auth_url)
+        self.auth_version = int(version_check.path[2:3])
         if self.auth_version == 2:
             self.auth_url = self.auth_url + '/v2.0'
         elif self.auth_version == 3:
@@ -210,15 +210,6 @@ class Client(object):
         else:
             raise exception.InvalidValue("Invalid value given for auth_version. It must be either 2 or 3")
     
-        # Enpoint validation
-	"""
-        try:
-            u = urlparse(self.endpoint)
-            self.sidecar_url = "%s://%s" % (u.scheme, u.netloc) + '/v2'
-        except Exception as e:
-            raise exception.InvalidValue("Invalid value given for endpoint")
-	"""
-     
         self.http     = client.HTTPClient(timeout=self.timeout, verify=self.insecure)
         self.events   = events.EventsHttp(self)
         self.versions = versions.VersionsHttp(self)
