@@ -38,14 +38,11 @@ def transform_status(event):
         return '-'
     return str(event.event_status).upper()
 
-def createEventLink(arg):
-    return reverse_lazy('horizon:sidecar_dashboard:events:event_detail', args=[arg.id])
-
 class TicketListTable(tables.DataTable):
     """ 
     TABLE TO LIST THE EVENTS
     """
-    name = tables.Column('name', verbose_name=_('Name'), sortable=True, link=createEventLink)
+    name = tables.Column('name', verbose_name=_('Name'), sortable=True, link='horizon:sidecar_dashboard:events:event_detail')
     status = tables.Column('event_status', verbose_name=_("Status"), sortable=True)
     #transform_status
     status = tables.Column(transform_status, verbose_name=_("Status"), sortable=True)
@@ -55,6 +52,6 @@ class TicketListTable(tables.DataTable):
      
     class Meta:
         name = "events"
-        verbose_name = _("My Events")
+        verbose_name = _("Evacuation Events")
         table_actions = ()
         table_actions = (EventFilterAction,)

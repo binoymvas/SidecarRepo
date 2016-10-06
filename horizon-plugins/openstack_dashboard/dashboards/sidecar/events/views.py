@@ -22,6 +22,7 @@ from horizon import tabs
 from horizon import exceptions
 from horizon.utils import memoized
 from django.conf import settings
+from sidecarclient import client
 import requests
 import json
 
@@ -33,19 +34,28 @@ class IndexView(tabs.TabbedTableView):
     """
     tab_group_class = event_tabs.MyEventsTab
     template_name   = "sidecar_dashboard/events/index.html"
-    page_title      = "My Events"
+    page_title      = "Evacuation Events"
 
 def get_event_detail(request, **kwargs):
-    print " in the get_event_details"
-    print kwargs, 'kwargs'
 
-    pecan_evacuate_url = getattr(settings, 'EVACUATE_URL', '')
-    header = {'X-Auth-Token': request.user.token.id, 'Content-Type': 'application/json'}
-    args = {}
-    response =  requests.get(pecan_evacuate_url + '/details/'+ kwargs['event_id'], params=args, auth=('user', 'pass'), headers=header)
-    event_data = json.loads(response.text)
+    #Configuring the settings
+    #Values are taken from settings.py file
+    sidecar = client.Client(
+        auth_version = getattr(settings, "SC_AUTH_VERSION"),
+        username = getattr(settings, "SC_USERNAME"),
+        password = getattr(settings, "SC_PASSWORD"),
+        auth_url = getattr(settings, "SC_AUTH_URL"),
+        region_name = getattr(settings, "SC_REGION_NAME"),
+        tenant_name = getattr(settings, "SC_TENANT_NAME"),
+        timeout = getattr(settings, "SC_TIMEOUT"),
+        insecure = getattr(settings, "SC_INSECURE")
+    )
+
+    #Fetching the details of the selected event
+    event_details = sidecar.events.detail(id=kwargs['event_id'])
     context = {
-        "page_title": _("Event Details: %s") % event_data['event']['name'],
-        "events": event_data['event']
+        "page_title": _("Event Details: %s") %(event_details.name),
+        "events": event_details
     }
     return render(request, 'sidecar_dashboard/events/event_detail.html', context)
+
