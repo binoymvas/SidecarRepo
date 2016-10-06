@@ -10,7 +10,7 @@ schema = {
                     "pattern": r"^[a-zA-Z0-9]([\w\s-]+[a-zA-Z0-9])$"
                 },
                 "event_status": {
-                    "enum": [ "running", "completed" ]
+                    "enum": [ "running", "completed", "failure", "migrating"]
                 },
                 "node_uuid": {
                     "type": "string"

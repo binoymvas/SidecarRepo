@@ -331,7 +331,35 @@ class HostEvacuateController(RestController):
             update_event_status(hypervisor_name, 'completed')
 
     def update_event_status(self, hostname, status):
-        print "here"
+        """
+        # | Function to do update the events
+        # |
+        # | Arguments:
+        # |     <hostname>: host name
+        # |     <status>: status of the event
+        # | Returns: Null
+        """
+
+        #If the status is in completed state, then removeing the log and updating the event with completed status
+        if status == 'completed':
+            self.evacuates.delete_log(hypervisor_name)
+            LOG.info("Log of hypervisor with name " + hypervisor_name + "is deleted.")
+            search_event = {'name': hostname}
+            event_details = self.evacuates.list_events(search_event)
+            LOG.info("Got the list of hypervisors")
+
+            # | If list exists the proceeding with the status check
+            # | else creating the event  
+            if len(event_details) > 0:
+            
+                #Getting the details of event
+                for event_detail in event_details:
+                    event_id  = event_detail.get("id")
+                    self.evacuates.delete_event(event_id)
+                    LOG.info("Event with id " + event_id + "is completed.")
+                    complete_data = {'event_status' : 'completed', 'extra': 'NULL'}
+                    self.evacuates.update_event(event_id, complete_data)
+
     def evacuate_instances(self, instances, event_id, targethost=None):
         """
         # | Function to do the instance evacuation
