@@ -159,7 +159,7 @@ class SidecarShell(object):
             default=cliutils.env('OS_REGION_NAME', 'SIDECAR_REGION_NAME'),
             help='Defaults to env[OS_REGION_NAME].'
         )
-	"""
+        """
         parser.add_argument(
             '--os-endpoint',
             default=cliutils.env('OS_ENDPOINT', 'SIDECAR_ENDPOINT'),
@@ -170,12 +170,12 @@ class SidecarShell(object):
             default=cliutils.env('OS_ENDPOINT_TYPE', 'SIDECAR_ENDPOINT_TYPE'),
             help=argparse.SUPPRESS
         )
-	"""
         parser.add_argument(
             '--os-auth-version',
             default=cliutils.env('OS_AUTH_VERSION'),
             help="Which os auth version should be used, either 2 or 3. Default OS_AUTH_VERSION"
         )
+        """
         parser.add_argument(
             '--os-timeout',
             default=cliutils.env('OS_TIMEOUT'),
@@ -353,7 +353,7 @@ class SidecarShell(object):
             #endpoint            = self.endpoint,
             #endpoint_type       = self.endpoint_type,
             region_name         = self.region_name,
-            auth_version        = self.auth_version,
+#             auth_version        = self.auth_version,
             insecure            = self.insecure,
             timeout             = self.timeout,
             user_domain_id      = self.user_domain_id,
@@ -386,7 +386,7 @@ class SidecarShell(object):
             self.do_bash_completion(args)
             return 0
 
-        self.auth_version  = args.os_auth_version 
+#         self.auth_version  = args.os_auth_version 
         self.auth_token    = args.os_auth_token
         self.username      = args.os_username
         self.user_id       = args.os_user_id

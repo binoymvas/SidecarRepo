@@ -172,7 +172,7 @@ class Client(object):
     # | default value: None
     authenticated_token = None
 
-    def __init__(self, username = None, user_id=None, password=None,  auth_url=None, auth_token=None, tenant_id=None, tenant_name=None, project_name=None, project_id=None,project_domain_id=None, project_domain_name=None, user_domain_id=None, user_domain_name=None, region_name=None, auth_version=2,insecure=False, timeout=300):
+    def __init__(self, username = None, user_id=None, password=None,  auth_url=None, auth_token=None, tenant_id=None, tenant_name=None, project_name=None, project_id=None,project_domain_id=None, project_domain_name=None, user_domain_id=None, user_domain_name=None, region_name=None, insecure=False, timeout=300):
 
         self.username            = username
         self.password            = password
@@ -186,7 +186,6 @@ class Client(object):
         #self.endpoint           = endpoint
         self.endpoint_type       = 'publicURL'
         self.region_name         = region_name
-        self.auth_version        = auth_version
         self.insecure            = insecure
         self.timeout             = timeout
         self.user_domain_id      = user_domain_id
@@ -200,13 +199,10 @@ class Client(object):
             self.auth_url = "%s://%s" % (u.scheme, u.netloc)
         except Exception as e:
             raise exception.InvalidValue("Invalid value given for auth_url")
-    
-        try:
-            self.auth_version = int(float(self.auth_version))
-        except Exception as e:
-            raise exception.InvalidValue("Invalid value given for auth_version. It must be either 2 or 3")
-
+        
         # | Auth version validation
+        version_check = urlparse(self.auth_url)
+        self.auth_version = version_check.path[2:3]
         if self.auth_version == 2:
             self.auth_url = self.auth_url + '/v2.0'
         elif self.auth_version == 3:

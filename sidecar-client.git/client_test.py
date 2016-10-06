@@ -1,7 +1,6 @@
 from sidecarclient import client
 
 sidecar = client.Client(
-    auth_version = 2,
     username = "admin",
     password = "5d6baead492b",
     auth_url = "https://api.stage1.nephoscale.com:35357/v2",
