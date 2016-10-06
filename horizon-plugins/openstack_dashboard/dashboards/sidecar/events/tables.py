@@ -38,7 +38,7 @@ def transform_status(event):
         return '-'
     return str(event.event_status).upper()
 
-class TicketListTable(tables.DataTable):
+class EventListTable(tables.DataTable):
     """ 
     TABLE TO LIST THE EVENTS
     """
