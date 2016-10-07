@@ -173,7 +173,11 @@ class Evacuate():
         get_event_list = select([self.evacuate_events])
             
         for key in valid_args:
-            val = valid_args[key].strip()
+            if type(valid_args[key])==bool:
+                val = valid_args[key]
+            else:
+                val = valid_args[key].strip()
+       
             if not val:
                 continue;
             if key == "id":
