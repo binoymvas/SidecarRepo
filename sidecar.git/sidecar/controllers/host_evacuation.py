@@ -66,8 +66,6 @@ class HostEvacuateController(RestController):
         # Log, dead time and json file details
         LOG.info("Getting the details from the conf file")
         self.evacuate_deadtime = config.get('evacuate_details', 'dead_time', '180')
-        self.evacuate_data_file = config.get('evacuate_details', 'data_file', '/tmp/evacuate.json')
-        self.evacuate_log_file = config.get('evacuate_details', 'log_file', '/tmp/evacuate.log')
         self.failure_threshold = config.get('evacuate_details', 'failure_threshold', '300')
         self.shared_storage_flag = config.get('evacuate_details', 'shared_storage_flag', False)
 
