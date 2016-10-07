@@ -182,7 +182,7 @@ class HostEvacuateController(RestController):
                         LOG.info("Hypervisor is down for " + str(down_since_log))
                         LOG.info("Searching the events using the hyervisor name.")
                         search_event = {'name': hyper_visor.hypervisor_hostname}
-                        event_details = self.evacuates.list_events(search_event, filter_out=True)
+                        event_details = self.evacuates.list_events(True, search_event)
                         LOG.info("Got the list of hypervisors")
 
                         # | If list exists the proceeding with the status check
@@ -328,7 +328,7 @@ class HostEvacuateController(RestController):
         else:
             update_event_status(hypervisor_name, 'completed')
 
-    def update_event_status(self, hostname, status):
+    def update_event_status(self, hypervisor_name, status):
         """
         # | Function to do update the events
         # |
@@ -340,10 +340,9 @@ class HostEvacuateController(RestController):
 
         #If the status is in completed state, then removeing the log and updating the event with completed status
         if status == 'completed':
-            self.evacuates.delete_log(hypervisor_name)
-            LOG.info("Log of hypervisor with name " + hypervisor_name + "is deleted.")
-            search_event = {'name': hostname}
-            event_details = self.evacuates.list_events(search_event, filter_out=True)
+            self.delete_log(hypervisor_name)
+            search_event = {'name': hypervisor_name}
+            event_details = self.evacuates.list_events(True, search_event)
             LOG.info("Got the list of hypervisors")
 
             # | If list exists the proceeding with the status check
@@ -352,11 +351,10 @@ class HostEvacuateController(RestController):
             
                 #Getting the details of event
                 for event_detail in event_details:
-                    event_id  = event_detail.get("id")
-                    self.evacuates.delete_event(event_id)
-                    LOG.info("Event with id " + event_id + "is completed.")
+                    event_id  = event_detail.get("id")                 
                     complete_data = {'event_status' : 'completed', 'extra': 'NULL'}
                     self.evacuates.update_event(event_id, complete_data)
+                    LOG.info("Event with id " + event_id + "is completed.")
 
     def evacuate_instances(self, instances, event_id, targethost=None):
         """
@@ -407,19 +405,17 @@ class HostEvacuateController(RestController):
             LOG.info(e)
             return False
 
-    def delete_all(self, event_id, hypervisor_name):
+    	
+    def delete_log(self, hypervisor_name):
         """
         # | Function to delete the event as well as the log entries
         # |
         # | Arguments:
-        # |     <event_id>:  event id
         # |     <hypervisor_name>: Name of the hypervisor 
         # | Returns: Null
         """
 
         # | Doing the evacuation of the instances
-        self.evacuates.delete_event(event_id)
-        LOG.info("Event with id " + event_id + "is deleted.")
         self.evacuates.delete_log(hypervisor_name)
         LOG.info("Log of hypervisor with name " + hypervisor_name + "is deleted.")
 
