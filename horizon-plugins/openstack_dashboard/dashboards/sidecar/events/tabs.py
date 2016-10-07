@@ -66,6 +66,8 @@ class EventListingTab(tabs.TableTab):
                 args['id'] = self.request.POST['events__eventfilter__q']
             elif field_name == 'name':
                 args['name'] = self.request.POST['events__eventfilter__q']
+            elif field_name == 'event_status':
+                args['event_status'] = self.request.POST['events__eventfilter__q']
 
             #Fetching the event list and returning it
             events = sidecar.events.list(**args)

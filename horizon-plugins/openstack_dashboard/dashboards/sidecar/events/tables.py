@@ -21,6 +21,7 @@ class EventFilterAction(tables.FilterAction):
     needs_preloading = True
     filter_choices = (("id", _("ID"), True),
                      ("name", _("Name"), True),
+                     ("event_status", _("Event Status"), True),
                      ("node_uuid", _("Node UUID"), True),
                      ('event_create_time', _("Create Time >="), True),
                      ('vm_uuid_list', _("VM UUID"), True))
