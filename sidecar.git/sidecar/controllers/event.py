@@ -117,7 +117,6 @@ class EventController(RestController):
             self.evacuates.update_event(event_id, json_data['event'])
             pecan.response.status = 204
         except Exception as e:
-            print "%%%%%%%%%%%%%%%%%%"
             print e.message
             return exception_handle(e)
           

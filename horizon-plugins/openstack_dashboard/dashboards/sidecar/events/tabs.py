@@ -73,7 +73,7 @@ class EventListingTab(tabs.TableTab):
             events = sidecar.events.list(**args)
             return events
         except Exception, e:
-	    print(e)
+	    
             exceptions.handle(self.request, "Unable to fetch events.....")
             return []
 
