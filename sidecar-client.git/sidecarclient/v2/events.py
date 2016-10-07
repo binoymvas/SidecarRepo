@@ -140,7 +140,7 @@ class EventsHttp(object):
 
         
     def list(self, id=None, name=None, node_uuid=None, event_create_time=None,
-        min_event_create_time=None, max_event_create_time=None, marker=None, limit=None):
+        min_event_create_time=None, max_event_create_time=None, marker=None, limit=None, event_status=None):
         """
         # | Function to list the evenets
         # |
@@ -159,12 +159,14 @@ class EventsHttp(object):
         self._obj.authenticate()
         headers = {"X-Auth-Token":self._obj.authenticated_token}
         url     = self._obj.sidecar_url + '/evacuates/events?'
-        
+                
         # | Createing filter options
         if id:
             url = url + "id=%s&" % (id)
         if name:
             url = url + "name=%s&" % (name)
+        if event_status:
+            url = url + "event_status=%s&" % (event_status)
         if node_uuid:
             url = url + "node_uuid=%s&" % (node_uuid)
         if event_create_time:
@@ -177,7 +179,7 @@ class EventsHttp(object):
             url = url + "marker=%s&" % (marker)
         if limit:
             url = url + "limit=%s&" % (limit)
-
+ 
         # | Make http request
         data = self._obj.http.get(url, headers)
         return ResultGenerator(data['body'])
