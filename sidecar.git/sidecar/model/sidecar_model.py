@@ -139,7 +139,7 @@ class Evacuate():
             result['extra'] = json.loads(data['extra'])        
         return result
 
-    def list_events(self, args={}):
+    def list_events(self, filter_out=None, args={}):
         """
         # | Method to list the events
         # |
@@ -148,7 +148,7 @@ class Evacuate():
         # | Returns Distionary
         """
 
-	#Setting the allowed args for the serach
+        #Setting the allowed args for the serach
         allowed_args = [
             'id',
             'name',
@@ -168,7 +168,11 @@ class Evacuate():
                 valid_args[arg] = args[arg]
 
         # Okay Bow lets start our query builder
-        get_event_list = select([self.evacuate_events])
+        if filter_out == True:
+            get_event_list = select([self.evacuate_events]).where(not_(or_(self.evacuate_events.c.event_status == 'failure', self.evacuate_events.c.event_status == 'completed')))
+        else:
+            get_event_list = select([self.evacuate_events])
+            
         for key in valid_args:
             val = valid_args[key].strip()
             if not val:
