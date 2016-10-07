@@ -181,6 +181,8 @@ class Evacuate():
                 get_event_list = get_event_list.where(self.evacuate_events.c.id == val)
             if key == "name":
                 get_event_list = get_event_list.where(self.evacuate_events.c.name.like('%' + val + '%'))
+            if key == "event_status":
+                get_event_list = get_event_list.where(self.evacuate_events.c.event_status.like('%' + val + '%'))
             if key == 'node_uuid':
                 get_event_list = get_event_list.where(self.evacuate_events.c.node_uuid == val)
             if key == 'event_create_time':
