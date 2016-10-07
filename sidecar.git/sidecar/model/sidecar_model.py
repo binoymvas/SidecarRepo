@@ -139,7 +139,7 @@ class Evacuate():
             result['extra'] = json.loads(data['extra'])        
         return result
 
-    def list_events(self, filter_out=None, args={}):
+    def list_events(self, args={}):
         """
         # | Method to list the events
         # |
@@ -152,12 +152,14 @@ class Evacuate():
         allowed_args = [
             'id',
             'name',
+            'event_status',
             'node_uuid', 
             'event_create_time', 
             'min_event_create_time',
             'max_event_create_time', 
             'marker',
-            'limit'
+            'limit',
+            'filter_out'
         ]
         valid_args = {}
         for arg in args:
@@ -168,10 +170,7 @@ class Evacuate():
                 valid_args[arg] = args[arg]
 
         # Okay Bow lets start our query builder
-        if filter_out == True:
-            get_event_list = select([self.evacuate_events]).where(not_(or_(self.evacuate_events.c.event_status == 'failure', self.evacuate_events.c.event_status == 'completed')))
-        else:
-            get_event_list = select([self.evacuate_events])
+        get_event_list = select([self.evacuate_events])
             
         for key in valid_args:
             val = valid_args[key].strip()
@@ -191,8 +190,10 @@ class Evacuate():
                 get_event_list = get_event_list.where(self.evacuate_events.c.event_create_time >= val)
             if key == 'max_event_create_time':
                 get_event_list = get_event_list.where(self.evacuate_events.c.event_create_time <= val)
+            if key == 'filter_out':
+                get_event_list = select([self.evacuate_events]).where(not_(or_(self.evacuate_events.c.event_status == 'failure', self.evacuate_events.c.event_status == 'completed')))
         
-	LOG.info("Created the query with filter options.")
+        LOG.info("Created the query with filter options.")
         get_event_list = get_event_list.order_by(desc(self.evacuate_events.c.event_create_time))
         # As per the documentaion in
         # https://specs.openstack.org/openstack/api-wg/guidelines/pagination_filter_sort.html

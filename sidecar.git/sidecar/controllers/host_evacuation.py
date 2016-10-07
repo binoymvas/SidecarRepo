@@ -181,8 +181,8 @@ class HostEvacuateController(RestController):
                     if int(down_since_log) >= int(dead_time):
                         LOG.info("Hypervisor is down for " + str(down_since_log))
                         LOG.info("Searching the events using the hyervisor name.")
-                        search_event = {'name': hyper_visor.hypervisor_hostname}
-                        event_details = self.evacuates.list_events(True, search_event)
+                        search_event = {'name': hyper_visor.hypervisor_hostname, 'filter_out': True}
+                        event_details = self.evacuates.list_events(search_event)
                         LOG.info("Got the list of hypervisors")
 
                         # | If list exists the proceeding with the status check
@@ -341,8 +341,8 @@ class HostEvacuateController(RestController):
         #If the status is in completed state, then removeing the log and updating the event with completed status
         if status == 'completed':
             self.delete_log(hypervisor_name)
-            search_event = {'name': hypervisor_name}
-            event_details = self.evacuates.list_events(True, search_event)
+            search_event = {'name': hypervisor_name, 'filter_out': True}
+            event_details = self.evacuates.list_events(search_event)
             LOG.info("Got the list of hypervisors")
 
             # | If list exists the proceeding with the status check
