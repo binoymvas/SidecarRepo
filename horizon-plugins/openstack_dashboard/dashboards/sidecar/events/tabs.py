@@ -18,6 +18,49 @@ from django.conf import settings
 from pprint import pprint
 import requests
 import json
+
+#Making the connection to sidecar client
+_sidecar_ = None
+def sidecar_conn():
+    global _sidecar_
+    if not _sidecar_:
+        _sidecar_ = client.Client(
+                  username = getattr(settings, "SC_USERNAME"),
+                  password = getattr(settings, "SC_PASSWORD"),
+                  auth_url = getattr(settings, "SC_AUTH_URL"),
+                  region_name = getattr(settings, "SC_REGION_NAME"),
+                  tenant_name = getattr(settings, "SC_TENANT_NAME"),
+                  timeout = getattr(settings, "SC_TIMEOUT"),
+                  insecure = getattr(settings, "SC_INSECURE")
+            )
+    return _sidecar_
+
+class LogListingTab(tabs.TableTab):
+    """ 
+    Class to handle the log listing
+    """
+    name = _("Evacuate Log")
+    slug = "ievacuate_logs"
+    table_classes = (tables.LogListTable, )
+    template_name = ("horizon/common/_detail_table.html")
+    preload = True
+    _has_more_data = False
+    _has_prev_data = False
+
+    def get_logs_data(self):
+        """
+        # | Function to get the evacuate log list 
+        # |
+        # | @Arguments: None
+        # |
+        # | @Return Type: Dictionary
+        """
+        try:
+            logs = sidecar_conn().events.evacuate_healthcheck_status()
+            return logs
+        except Exception, e:
+            return []        
+
 class EventListingTab(tabs.TableTab):
     """ 
     Class to Display the Evacuation Events
@@ -39,19 +82,6 @@ class EventListingTab(tabs.TableTab):
         # | @Return Type: Dictionary
         """
         try:
-
-            #Configuring all the access settings
-            #Values are taken from settings.py file
-            sidecar = client.Client(
-                  auth_version = getattr(settings, "SC_AUTH_VERSION"),
-                  username = getattr(settings, "SC_USERNAME"),
-                  password = getattr(settings, "SC_PASSWORD"),
-                  auth_url = getattr(settings, "SC_AUTH_URL"),
-                  region_name = getattr(settings, "SC_REGION_NAME"),
-                  tenant_name = getattr(settings, "SC_TENANT_NAME"),
-                  timeout = getattr(settings, "SC_TIMEOUT"),
-                  insecure = getattr(settings, "SC_INSECURE")
-            )
             
             #Getting the field name from the post
             args = {}
@@ -70,7 +100,7 @@ class EventListingTab(tabs.TableTab):
                 args['event_status'] = self.request.POST['events__eventfilter__q']
 
             #Fetching the event list and returning it
-            events = sidecar.events.list(**args)
+            events = sidecar_conn().events.list(**args)
             return events
         except Exception, e:
 	    

@@ -56,3 +56,16 @@ class EventListTable(tables.DataTable):
         verbose_name = _("Evacuation Events")
         table_actions = ()
         table_actions = (EventFilterAction,)
+
+class LogListTable(tables.DataTable):
+    """ 
+    TABLE TO LIST THE LOGS
+    """
+    hypervisor_name = tables.Column('hypervisor_name', verbose_name=_('hypervisor_name'), sortable=True)
+    down_since = tables.Column('down_since', verbose_name=_("down_since"), sortable=True)
+    event_creation_time  = tables.Column('event_creation_time', verbose_name=_('Created Time'), sortable=True)
+
+    class Meta:
+        name = "logs"
+        verbose_name = _("Evacuate Event Logs")
+        table_actions = ()
