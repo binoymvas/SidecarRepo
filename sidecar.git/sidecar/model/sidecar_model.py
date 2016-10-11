@@ -402,11 +402,11 @@ class Evacuate():
         for row in result:
             log_data = collections.OrderedDict()
             log_data['id']                  = row['id']
-            log_data['name']                = row['hypervisor_name']
+            log_data['hypervisor_name']     = row['hypervisor_name']
             log_data['down_since']          = row['down_since']
-            log_data['evacuated']   	    = row['evacuated']
-            log_data['event_id'] 	    = row['event_id']
-            log_data['prev_time'] 	    = row['prev_time']
+            log_data['evacuated']           = row['evacuated']
+            log_data['event_id']            = row['event_id']
+            log_data['prev_time']           = row['prev_time']
             log_data['event_creation_time'] = row['event_creation_time']
             log_list.append(log_data)
         return log_list

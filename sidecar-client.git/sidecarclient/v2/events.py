@@ -121,7 +121,104 @@ class ResultGenerator(object):
             obj =  Event(self._events[self._position])
             self._position = self._position + 1
             return obj
-        raise StopIteration() 
+        raise StopIteration()
+
+class EvacuateLogs(object):
+    """
+    # | Class to provide Logs Object
+    """
+
+    # | id: id of the event
+    # |
+    # | Default Value: None
+    # |
+    # | Type: String
+    id = None
+
+    # | hypervisor_name: Hypervisor name
+    # |
+    # | Default Value: None
+    # |
+    # | Type: String
+    hypervisor_name = None
+    
+    # | down_since: down since the host is gone offline
+    # |
+    # | Default Value: 0
+    # |
+    # | Type: Float
+    down_since = None
+
+    # | evacuated: Event is evacuated or not 
+    # |
+    # | Default Value: False
+    # | 
+    # | Type: String
+    evacuated = None
+
+    # | event_id : Event id of the event
+    # |
+    # | Default Value: None
+    # |
+    # | Type: Integer
+    event_id = None
+
+    # | prev_time: Log create time in yyy-mm-dd HH:ii:ss format
+    # |
+    # | Default Value: None
+    # |
+    # | Type: string
+    prev_time = None
+
+    # | event_creation_time : Event create time in yyy-mm-dd HH:ii:ss format
+    # |
+    # | Default Value: None
+    # |
+    # | Type: string
+    event_creation_time = None
+
+    def __init__(self, logs):
+        """ Initialization Function """
+        self.id                  = logs['id']
+        self.hypervisor_name     = logs['hypervisor_name']
+        self.down_since          = logs['down_since']
+        self.evacuated           = logs['evacuated']
+        self.event_id            = logs['event_id']
+        self.prev_time           = logs['prev_time']
+        self.event_creation_time = logs['event_creation_time']
+
+class LogResultGenerator(object):
+    """ Result Generator object """
+
+    def __init__(self, log_list):
+        # | Intialziation function
+        # |
+        # | Arguments: log_list
+        # |
+        # | Returns None       
+        self._count = len(log_list['logs'])
+        self._logs = log_list['logs']
+        self._position = 0
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return self._count
+
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+        if self._position < self._count:
+            # | IF POSITION IS LESS THAN TOTAL ELEMT
+            # | Continue the looping
+            print("in the next")
+            obj =  EvacuateLogs(self._logs[self._position])
+            print("in the next 2")
+            self._position = self._position + 1
+            return obj
+        raise StopIteration()
 
 class EventsHttp(object):
     """
@@ -312,3 +409,4 @@ class EventsHttp(object):
         headers = {"X-Auth-Token":self._obj.authenticated_token}
         url = self._obj.sidecar_url + '/evacuates/hostevacuate'
         data = self._obj.http.get(url, headers)
+        return LogResultGenerator(data['body'])

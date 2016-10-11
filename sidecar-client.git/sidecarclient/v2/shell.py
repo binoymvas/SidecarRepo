@@ -272,8 +272,6 @@ def do_evacuates_event_edit(obj, args):
 
 def do_evacuate_event_run(obj, args):
     """Run a evacuate event"""
-    print(args)
-    print("args")
     filter_options = {}
     if getattr(args, 'id', None):
         filter_options['id'] = args.id
@@ -325,10 +323,10 @@ def do_all_versions(obj, args=None):
 def do_evacuate_healthcheck_status(obj, args=None):
     """Healthcheck Log Details for an event"""
     sidecar = obj.get_sidecar_client()
-    logs = sidecar.events.evacuate_healthcheck_status()
+    log_data = sidecar.events.evacuate_healthcheck_status()
     table = PrettyTable()
     table.field_names = ["Hypervisor Name", "Down Since", "Event creationtime "]
-    for log in logs:
+    for log in log_data:
         table.add_row([log.hypervisor_name, log.down_since, log.event_creation_time])
     table.align = "l"
     print(table)

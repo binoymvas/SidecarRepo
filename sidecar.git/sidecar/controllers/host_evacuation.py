@@ -86,7 +86,6 @@ class HostEvacuateController(RestController):
         try:
             rbac.enforce('list_events', pecan.request)
             logs = self.evacuates.list_log(kw)
-            LOG.error("Got all the logs.")
             return {"logs": logs}
         except Exception as err:
             LOG.error("Error in getting all the logs.")
