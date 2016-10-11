@@ -73,6 +73,25 @@ class HostEvacuateController(RestController):
         LOG.info("Making the database connection.")
         self.evacuates = sql_model.Evacuate()
 
+    @expose(generic=True, template='json')
+    def get_all(self, **kw):
+        """
+        # | Function to list the events
+        # |
+        # | @Arguments:
+        # |     <kw>: Url query parameters
+        # |
+        # | @Returns: Json response
+        """
+        try:
+            rbac.enforce('list_events', pecan.request)
+            logs = self.evacuates.list_log(kw)
+            LOG.error("Got all the logs.")
+            return {"logs": logs}
+        except Exception as err:
+            LOG.error("Error in getting all the logs.")
+            return exception_handle(err)
+
     @expose(generic=True, template='json', content_type="application/json")
     def post(self, **kw):
         """

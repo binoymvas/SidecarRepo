@@ -298,3 +298,17 @@ class EventsHttp(object):
         url = self._obj.sidecar_url + '/evacuates/hostevacuate'
         data = {"event": {"name": 'name',"vm_uuid_list": 'vm_uuid_list',"node_uuid": 'node_uuid'}}
         data = self._obj.http.post(url,  data, headers)
+
+    def evacuate_healthcheck_status(self):
+        """
+        # | Function to execute and fetch the healthcheck details for all events
+        # |
+        # | Arguments
+        # |   :id <string>: event_id
+        # | Returns:
+        #|   None
+        """
+        self._obj.authenticate()
+        headers = {"X-Auth-Token":self._obj.authenticated_token}
+        url = self._obj.sidecar_url + '/evacuates/hostevacuate'
+        data = self._obj.http.get(url, headers)

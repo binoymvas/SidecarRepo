@@ -113,7 +113,6 @@ def do_evacuates_events_lists(obj, args):
     table.align='l'
     print(table)
 
-
 ####################################################
 # evacuates-event-create                           #
 ###################################################
@@ -320,3 +319,16 @@ def do_all_versions(obj, args=None):
     table.align = "l"
     print(table)
 
+###################################################
+# evacuate-healthcheck-status                     #
+###################################################
+def do_evacuate_healthcheck_status(obj, args=None):
+    """Healthcheck Log Details for an event"""
+    sidecar = obj.get_sidecar_client()
+    logs = sidecar.events.evacuate_healthcheck_status()
+    table = PrettyTable()
+    table.field_names = ["Hypervisor Name", "Down Since", "Event creationtime "]
+    for log in logs:
+        table.add_row([log.hypervisor_name, log.down_since, log.event_creation_time])
+    table.align = "l"
+    print(table)

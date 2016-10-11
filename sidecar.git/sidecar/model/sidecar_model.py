@@ -85,7 +85,7 @@ class Evacuate():
         Return : Json data
         """
 
-	#Setting the parameters for the event creation
+        #Setting the parameters for the event creation
         unique_id = uuid.uuid4().hex
         arg = {
             "id": unique_id,
@@ -98,7 +98,7 @@ class Evacuate():
         #Inserting the data
         ins = self.evacuate_events.insert().values(arg)
         result = self.conn.execute(ins)
-	LOG.info("Event created with id " + str(unique_id))
+        LOG.info("Event created with id " + str(unique_id))
         return unique_id
 
     def get_detail(self, uuid):
@@ -111,12 +111,12 @@ class Evacuate():
         # | Returns: Json
         """
 
-	#Getting the detail of the event
+        #Getting the detail of the event
         get_data_select = select([self.evacuate_events]).where(self.evacuate_events.c.id == uuid)
         get_data = self.conn.execute(get_data_select)
-	LOG.info("Getting the event details")
+        LOG.info("Getting the event details")
 
-	#Raise exception if no event is present else fetching the one
+        #Raise exception if no event is present else fetching the one
         if not get_data.rowcount:
             LOG.error("No event with id " + uuid + " found.")
             raise exception.NotFound("No event with id " + uuid + " found.")
@@ -211,7 +211,7 @@ class Evacuate():
             LOG.error(str(e))
             return []
 
-	#Getting the values are setting it in list
+        #Getting the values are setting it in list
         event_list = []
         for row in result:
             event_data = collections.OrderedDict()
@@ -250,7 +250,7 @@ class Evacuate():
         limit = int(float(limit))
 
         event_list = event_list[first_index:limit]
-	LOG.info("Sending back the result.")
+        LOG.info("Sending back the result.")
         return event_list
  
     def update_event(self, event_id, data):
@@ -264,7 +264,7 @@ class Evacuate():
         # | Returns: None
         """
 
-	#Getting the details of event using event id
+        #Getting the details of event using event id
         event_detail = self.get_detail(event_id)
         if "name" in data:
             # | If name is the parameter check for 
@@ -276,10 +276,10 @@ class Evacuate():
                 ))
             name_exist = self.conn.execute(name_check).rowcount
             if name_exist:
-		LOG.error("There is already an event named " + data['name'])
+                LOG.error("There is already an event named " + data['name'])
                 raise exception.Conflict("There is already an event named " + data['name'])
 
-	#Updating the event status
+        #Updating the event status
         if 'event_status' in data:
             if data['event_status'] == 'completed':
                 data['event_complete_time'] = datetime.datetime.now()
@@ -295,7 +295,7 @@ class Evacuate():
         #Updating the data
         update = self.evacuate_events.update().where(self.evacuate_events.c.id == event_id).values(data)
         self.conn.execute(update)
-	LOG.info("Event is updated succesfully.")
+        LOG.info("Event is updated succesfully.")
  
     def delete_event(self, event_id):
         """
@@ -310,16 +310,16 @@ class Evacuate():
         # | A vent can be deleted, only if it's status completed
         # | Otherwise by deleting it will make error
         event_detail = self.get_detail(event_id)
-	if event_detail['name']:
+        if event_detail['name']:
             self.delete_log(event_detail['name'])
         #if event_detail['event_status'] != 'completed':
         #raise exception.Forbidden("Events with completed status only can be deleted.")
         query = self.evacuate_events.delete().where(self.evacuate_events.c.id == event_id)
         self.conn.execute(query)
-	LOG.info("Event is deleted succesfully.")
+        LOG.info("Event is deleted succesfully.")
 
     def createLog(self, kw):
-	"""
+        """
         # | Function to delete an event
         # |
         # | Arguments:
@@ -329,7 +329,7 @@ class Evacuate():
         """
 
         #Setting the dictionary to insert 
-	arg = {
+        arg = {
             "hypervisor_name": kw['hypervisor_name'],
             "down_since": kw['down_since'],
             "evacuated": "False",
@@ -341,7 +341,7 @@ class Evacuate():
         #Inserting the data
         ins = self.evacuation_log.insert().values(arg)
         result = self.conn.execute(ins)
-	LOG.info("Log is created succesfully.")
+        LOG.info("Log is created succesfully.")
         return result
 
     def get_log_detail(self, name):
@@ -354,27 +354,27 @@ class Evacuate():
         # | Returns: Json
         """
 	
-	#Searching the database and gettign the details
+        #Searching the database and gettign the details
         get_data_select = select([self.evacuation_log]).where(self.evacuation_log.c.hypervisor_name == name)
-	get_data = self.conn.execute(get_data_select)
-	LOG.info("Got details of the log")
-
-	#Checking the row count and returning the result
+        get_data = self.conn.execute(get_data_select)
+        LOG.info("Got details of the log")
+    
+        #Checking the row count and returning the result
         if not get_data.rowcount:
             result = []
             LOG.error("No log entry with hypervisor name " + name + " found.")
-	    return result
-        
-	#Fecthing the detail from the table.
-	data = get_data.fetchone()
+            return result
+            
+        #Fecthing the detail from the table.
+        data = get_data.fetchone()
         result = collections.OrderedDict()
         result["hypervisor_name"]     = name
         result["down_since"]          = data["down_since"]
         result["evacuated"]           = data["evacuated"]
         result["event_id"]            = data["event_id"]
-	result["prev_time"]           = data["prev_time"]
+        result["prev_time"]           = data["prev_time"]
         result["event_creation_time"] = data["event_creation_time"]	
-	LOG.info("Return back the results.")
+        LOG.info("Return back the results.")
         return result
 
     def list_log(self, args={}):
@@ -382,66 +382,22 @@ class Evacuate():
         # | Method to list the event logs
         # |
         # | Arguments: 
-	# |   <args>: Dictionary
+        # |   <args>: Dictionary
         # |
         # | Returns 
         """
 
-	#Setting the allowed args for the serach
-        allowed_args = [
-            'id',
-            'hypervisor_name',
-            'down_since', 
-            'evacuated', 
-            'event_id',
-            'prev_time', 
-            'event_creation_time',
-        ]
-        valid_args = {}
-        for arg in args:
-            # | For each given argument
-            # | If it matches with allowed argument
-            # | Then treat it as valid arg
-            if arg in allowed_args:
-                valid_args[arg] = args[arg]
-
         # Okay Bow lets start our query builder
         get_log_list = select([self.evacuation_log])
-        for key in valid_args:
-            val = valid_args[key].strip()
-            if not val:
-                continue;
-            if key == "id":
-                get_log_list = get_log_list.where(self.evacuation_log.c.id == val)
-            if key == "hypervisor_name":
-                get_log_list = get_log_list.where(self.evacuation_log.c.hypervisor_name.like('%' + val + '%'))
-            if key == 'down_since':
-                get_log_list = get_log_list.where(self.evacuation_log.c.down_since == val)
-            if key == 'evacuated':
-                get_log_list = get_log_list.where(self.evacuation_log.c.evacuated == val)
-            if key == 'event_id':
-                get_log_list = get_log_list.where(self.evacuation_log.c.event_id >= val)
-            if key == 'prev_time':
-                get_log_list = get_log_list.where(self.evacuation_log.c.prev_time <= val)
-            if key == 'event_creation_time':
-                get_log_list = get_log_list.where(self.evacuation_log.c.event_creation_time <= val)
-
-	LOG.info("Created the query with filter options.")
+        LOG.info("Created the query to get the list of logs.")
         get_log_list = get_log_list.order_by(desc(self.evacuation_log.c.event_creation_time))
-
-        # As per the documentaion in
-        # https://specs.openstack.org/openstack/api-wg/guidelines/pagination_filter_sort.html
-        # we need to add pagination  only after the filtering. So lets just filter out it.
-        #
-        # Point to be noted, though it is a bad idea to fetch all the data from db (in worst case when
-        # there is no filter option), for time being we have done this way. Later we need to use sqlAlchemy
         try:
             result = self.conn.execute(get_log_list)
         except Exception as e:
             LOG.error(str(e))
             return []
-	
-	#Getting the values are setting it in list
+
+        #Getting the values are setting it in list
         log_list = []
         for row in result:
             log_data = collections.OrderedDict()
@@ -450,35 +406,9 @@ class Evacuate():
             log_data['down_since']          = row['down_since']
             log_data['evacuated']   	    = row['evacuated']
             log_data['event_id'] 	    = row['event_id']
-	    log_data['prev_time'] 	    = row['prev_time']
+            log_data['prev_time'] 	    = row['prev_time']
             log_data['event_creation_time'] = row['event_creation_time']
             log_list.append(log_data)
- 
-	#Setting the marker
-        first_index = 0
-        if 'marker' in valid_args:
-            marker = valid_args['marker']
-            if marker is not None:
-                for (marker_index, log) in enumerate(log_list):
-                    if log['id'] == marker:
-                        # we start pagination after the marker
-                        first_index = marker_index + 1
-                        break
-        
-	#Setting the limit
-        limit = 30
-
-        # Checking for the limit. If the given
-        # Limit is not positive then, return emepty result
-        if "limit" in valid_args:
-            if not valid_args["limit"].isnumeric():
-                return []
-            if not valid_args["limit"] > 0:
-                return []
-            limit = valid_args["limit"].strip()
-        limit = int(float(limit))
-        log_list = log_list[first_index:limit]
-	LOG.info("Sending back the result.")
         return log_list
 
     def update_log(self, hypervisor_name, data):
@@ -494,9 +424,9 @@ class Evacuate():
         #log_detail = self.get_log_detail(hypervisor_name)
 
         #Checking that hypervisor name is in the data
-	if "hypervisor_name" in data:
+        if "hypervisor_name" in data:
             
-	    # | If hypervisor_name is the parameter check for 
+            # | If hypervisor_name is the parameter check for 
             # | the conflict
             name_check = select([self.evacuation_log]).where(self.evacuation_log.c.hypervisor_name == data['hypervisor_name'])
             name_exist = self.conn.execute(name_check).rowcount
@@ -504,7 +434,7 @@ class Evacuate():
                 #Updating the data
                 update = self.evacuation_log.update().where(self.evacuation_log.c.hypervisor_name == hypervisor_name).values(data)
                 self.conn.execute(update)
-		LOG.info("Log updated succesfully.")
+                LOG.info("Log updated succesfully.")
 
     def delete_log(self, hypervisor_name):
         """
@@ -516,7 +446,7 @@ class Evacuate():
         # | Returns: None
         """
 
-	#Setting the delete query
+        #Setting the delete query
         query = self.evacuation_log.delete().where(self.evacuation_log.c.hypervisor_name == hypervisor_name)
         self.conn.execute(query)
-	LOG.info("Log is deleted succesfully.")
+        LOG.info("Log is deleted succesfully.")
