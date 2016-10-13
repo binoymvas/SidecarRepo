@@ -255,18 +255,18 @@ class Evacuate():
 
         #Adding the conditions to show previous or next links   
         if limit > len(event_list):
-           #no need to display the next link and previous link
-           next_val = False
-           prev_val = False
+            #no need to display the next link and previous link
+            next_val = False
+            prev_val = False
            
         elif first_index > limit:
             #need to display the previous link
             prev_val = True
            
-           #Case in each individual page other tahn the first page
-           if catch_limit < len(event_list):
-               #need to display the next link
-               next_val = True
+            #Case in each individual page other tahn the first page
+            if catch_limit < len(event_list):
+                #need to display the next link
+                next_val = True
             else:
                 next_val = False
         else:

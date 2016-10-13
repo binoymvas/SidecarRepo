@@ -77,11 +77,17 @@ class EventListingTab(tabs.TableTab):
 
     def has_more_data(self, table):
         #Function to show the more link
-        return self.event_data._events[0]['moredata']
+	if len(self.event_data._events) > 0:
+            return self.event_data._events[0]['moredata']
+        else:
+            return False
 
     def has_prev_data(self, table):
         #function to show the previous link
-        return self.event_data._events[0]['predata']
+        if len(self.event_data._events) > 0:
+            return self.event_data._events[0]['predata']
+        else:
+            return False
  
     def get_events_data(self):
         """
@@ -146,6 +152,6 @@ def obj_dic(dict_values):
 
 class EvacuationEventsTab(tabs.TabGroup):
     slug = "evacuation_events_tab"
-    tabs = (EventListingTab,)
+    tabs = (EventListingTab, LogListingTab)
     sticky = True
 
