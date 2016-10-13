@@ -198,7 +198,7 @@ class Evacuate():
                 get_event_list = select([self.evacuate_events]).where(not_(or_(self.evacuate_events.c.event_status == 'failure', self.evacuate_events.c.event_status == 'completed')))
         
         LOG.info("Created the query with filter options.")
-        get_event_list = get_event_list.order_by(desc(self.evacuate_events.c.name))
+        get_event_list = get_event_list.order_by(desc(self.evacuate_events.c.event_create_time))
         # As per the documentaion in
         # https://specs.openstack.org/openstack/api-wg/guidelines/pagination_filter_sort.html
         # we need to add pagination  only after the filtering. So lets just filter out it.
@@ -221,8 +221,8 @@ class Evacuate():
             event_data['event_create_time']   = row['event_create_time']
             event_data['event_complete_time'] = row['event_complete_time']
             event_data['node_uuid']           = row['node_uuid']
-	    event_data['moredata']            =  False
-	    event_data['predata']             = True
+            event_data['moredata']            =  False
+            event_data['predata']             = True
 
             vm_uuid_list = []
             if row['vm_uuid_list']:
@@ -251,38 +251,38 @@ class Evacuate():
                 return []
             limit = valid_args["limit"].strip()
         limit = int(float(limit))
-	catch_limit = int(first_index) + int(limit)
+        catch_limit = int(first_index) + int(limit)
 
-
+        #Adding the conditions to show previous or next links   
         if limit > len(event_list):
            #no need to display the next link and previous link
-	   next_val = False
-	   prev_val = False
+           next_val = False
+           prev_val = False
            
         elif first_index > limit:
-	   #need to display the previous link
-           prev_val = True
+            #need to display the previous link
+            prev_val = True
            
            #Case in each individual page other tahn the first page
            if catch_limit < len(event_list):
                #need to display the next link
                next_val = True
-           else:
-               next_val = False
-        else:
-	    #need to display the previous link as well as the next link
-	    next_val = True
-	    
-	    #No need to display the previous link in the first page
-	    if first_index != 0:
-	        prev_val = True
             else:
-	        prev_val = False
-                            
+                next_val = False
+        else:
+            #need to display the previous link as well as the next link
+            next_val = True
+
+            #No need to display the previous link in the first page
+            if first_index != 0:
+                prev_val = True
+            else:
+                prev_val = False
+
         #Getting the event list with limit
         event_list = event_list[first_index: catch_limit]
-	
-	#Updating the moredata and predata with values
+
+        #Updating the moredata and predata with values
         for i in range(0, len(event_list)):
             event_list[i]['moredata'] = next_val
             event_list[i]['predata'] = prev_val

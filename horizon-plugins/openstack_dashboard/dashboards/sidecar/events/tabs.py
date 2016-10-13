@@ -77,11 +77,11 @@ class EventListingTab(tabs.TableTab):
 
     def has_more_data(self, table):
         #Function to show the more link
-        return self.self.event_data._events[0]['moredata']
+        return self.event_data._events[0]['moredata']
 
     def has_prev_data(self, table):
         #function to show the previous link
-        return self.self.event_data._events[0]['predata']
+        return self.event_data._events[0]['predata']
  
     def get_events_data(self):
         """
@@ -113,7 +113,7 @@ class EventListingTab(tabs.TableTab):
             marker = self.request.GET.get('marker', None)
             if marker != None:
                 args['marker'] = marker
-	    
+
             #Getting the limit from the settings
             limit = getattr(settings, "SC_DISPLAY_LIMIT", None)
             if limit != None:
@@ -123,7 +123,7 @@ class EventListingTab(tabs.TableTab):
             events = sidecar_conn().events.list(**args)
             self.event_data = events
             return list(events)
-        except Exception, e:	    
+        except Exception, e:
             exceptions.handle(self.request, "Unable to fetch events.")
             return []
 
