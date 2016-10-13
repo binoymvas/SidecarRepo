@@ -91,6 +91,8 @@ class Event(object):
         self.extra               = event['extra']
         self.event_create_time   = event['event_create_time']
         self.event_complete_time = event['event_complete_time']
+        self.event_more          = event['moredata']
+        self.event_prev          = event['predata']
 
 class ResultGenerator(object):
     """ Result Generator object """
@@ -213,9 +215,7 @@ class LogResultGenerator(object):
         if self._position < self._count:
             # | IF POSITION IS LESS THAN TOTAL ELEMT
             # | Continue the looping
-            print("in the next")
             obj =  EvacuateLogs(self._logs[self._position])
-            print("in the next 2")
             self._position = self._position + 1
             return obj
         raise StopIteration()
@@ -276,7 +276,7 @@ class EventsHttp(object):
             url = url + "marker=%s&" % (marker)
         if limit:
             url = url + "limit=%s&" % (limit)
- 
+
         # | Make http request
         data = self._obj.http.get(url, headers)
         return ResultGenerator(data['body'])

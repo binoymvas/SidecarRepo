@@ -22,6 +22,8 @@ import json
 #Making the connection to sidecar client
 _sidecar_ = None
 def sidecar_conn():
+    
+    #Making the sidecar connection
     global _sidecar_
     if not _sidecar_:
         _sidecar_ = client.Client(
@@ -70,8 +72,16 @@ class EventListingTab(tabs.TableTab):
     table_classes = (tables.EventListTable, )
     template_name = ("horizon/common/_detail_table.html")
     preload = False
-    #_has_more_data = False
-    #_has_prev_data = False
+    _has_more = True
+    _has_prev = True
+
+    def has_more_data(self, table):
+        #Function to show the more link
+        return self.self.event_data._events[0]['moredata']
+
+    def has_prev_data(self, table):
+        #function to show the previous link
+        return self.self.event_data._events[0]['predata']
  
     def get_events_data(self):
         """
@@ -99,12 +109,22 @@ class EventListingTab(tabs.TableTab):
             elif field_name == 'event_status':
                 args['event_status'] = self.request.POST['events__eventfilter__q']
 
+            #Adding marker 
+            marker = self.request.GET.get('marker', None)
+            if marker != None:
+                args['marker'] = marker
+	    
+            #Getting the limit from the settings
+            limit = getattr(settings, "SC_DISPLAY_LIMIT", None)
+            if limit != None:
+                args['limit'] = limit	     
+
             #Fetching the event list and returning it
             events = sidecar_conn().events.list(**args)
-            return events
-        except Exception, e:
-	    
-            exceptions.handle(self.request, "Unable to fetch events.....")
+            self.event_data = events
+            return list(events)
+        except Exception, e:	    
+            exceptions.handle(self.request, "Unable to fetch events.")
             return []
 
 class Event:

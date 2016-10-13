@@ -85,6 +85,10 @@ def do_evacuates_events_lists(obj, args):
         filter_options['event_status'] = args.event_status
     if getattr(args, 'node_uuid', None):
         filter_options['node_uuid'] = args.node_uuid
+    if getattr(args, 'marker', None):
+        filter_options['marker'] = args.marker
+    if getattr(args, 'limit', None):
+        filter_options['limit'] = args.limit
   
     sidecar = obj.get_sidecar_client()
     events_obj = sidecar.events.list(**filter_options)
